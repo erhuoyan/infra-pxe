@@ -119,7 +119,7 @@ if [ -f "$CONF_FILE" ]; then
     echo "  → 如需重新生成，删除后重跑: rm $CONF_FILE"
 else
     cat > "$CONF_FILE" << EOF
-worker:
+engine:
   listen: "0.0.0.0"
   port: $PORT
   interface: "$INTERFACE"

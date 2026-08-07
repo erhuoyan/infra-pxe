@@ -23,10 +23,10 @@ type Manager struct {
 	pid   int
 }
 
-
 func New(cfg *config.Config, s *store.Store) *Manager {
 	return &Manager{cfg: cfg, store: s}
 }
+
 // RegenerateConfig reloads dnsmasq after task changes.
 // DHCP static bindings (hostsfile) are owned EXCLUSIVELY by the bindings API
 // (POST/DELETE /api/dhcp/bindings, frontend DHCP page) — tasks never write
@@ -45,17 +45,16 @@ func (m *Manager) RegenerateConfig() {
 	}
 }
 
-
 // DhcpConfigParams holds the full DHCP configuration parameters pushed via API.
 type DhcpConfigParams struct {
-	Interface  string `json:"interface"`
-	DhcpStart  string `json:"dhcp_start"`
-	DhcpEnd    string `json:"dhcp_end"`
-	Netmask    string `json:"netmask"`
-	Gateway    string `json:"gateway"`
-	Dns        string `json:"dns"`
-	LeaseTime  string `json:"lease_time"`
-	EnableDns  bool   `json:"enable_dns"`
+	Interface string `json:"interface"`
+	DhcpStart string `json:"dhcp_start"`
+	DhcpEnd   string `json:"dhcp_end"`
+	Netmask   string `json:"netmask"`
+	Gateway   string `json:"gateway"`
+	Dns       string `json:"dns"`
+	LeaseTime string `json:"lease_time"`
+	EnableDns bool   `json:"enable_dns"`
 }
 
 // WriteConfig renders and writes dnsmasq.conf from params.
@@ -307,7 +306,7 @@ func (m *Manager) resolveServerAddr(iface string) string {
 		ip = "127.0.0.1"
 	}
 	if port == "" {
-		port = strconv.Itoa(m.cfg.Server.Port)
+		port = strconv.Itoa(m.cfg.Engine.Port)
 	}
 	return ip + ":" + port
 }

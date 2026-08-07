@@ -55,6 +55,6 @@ Seed 时用此接口设置 pxe_server_ip，确保渲染的 kickstart/iPXE 使用
 
 ## GET /api/results/{sn} — 按 SN 查历史
 
-## POST /api/shutdown — 关闭 Worker
+## POST /api/shutdown — 关闭 PXE Engine
 
 慎用。停止 dnsmasq 并退出进程。

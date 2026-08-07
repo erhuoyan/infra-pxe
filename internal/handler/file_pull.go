@@ -47,7 +47,7 @@ func (s *fileDownloadState) set(bid string, p *fileDownloadProgress) {
 	s.downloads[bid] = p
 }
 
-// fileCheckHandler checks if a file exists on this Worker.
+// fileCheckHandler checks if a file exists on this PXE Engine.
 // GET /api/files/{bid}/check → {exists, filename, size}
 func fileCheckHandler(cfg *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

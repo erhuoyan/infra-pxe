@@ -1,6 +1,6 @@
-# Validate — 校验 Worker 就绪状态
+# Validate — 校验 PXE Engine 就绪状态
 
-Worker seed 完之后、创建装机任务之前，必须校验整条链路完整。
+PXE Engine seed 完之后、创建装机任务之前，必须校验整条链路完整。
 
 ## 校验流程
 
@@ -16,7 +16,7 @@ Worker seed 完之后、创建装机任务之前，必须校验整条链路完�
   ├── template 字段引用的文件 → GET /api/templates/{template} 能拿到 ✓
   ├── ISO 是否挂载:
   │   ├── GET /api/iso/mounted → 检查 distro_path 对应的 ISO 已挂载
-  │   └── 或 HTTP 可达: curl http://worker:9200/{distro_path}/repo/ 返回 200
+  │   └── 或 HTTP 可达: curl http://<pxe-ip>:9200/{distro_path}/repo/ 返回 200
   └── boot_type == kickstart:
       ├── {distro_path}/repo/images/pxeboot/vmlinuz 可访问
       └── {distro_path}/repo/images/pxeboot/initrd.img 可访问
@@ -52,11 +52,11 @@ GET /api/iso/list    → 已有 ISO 文件
 GET /api/iso/mounted → 已挂载列表
 
 对每个 os_template.distro_path:
-  └── curl http://worker:9200/{distro_path}/repo/ → 200
+  └── curl http://<pxe-ip>:9200/{distro_path}/repo/ → 200
       kickstart:
-        curl http://worker:9200/{distro_path}/repo/images/pxeboot/vmlinuz → 200
+        curl http://<pxe-ip>:9200/{distro_path}/repo/images/pxeboot/vmlinuz → 200
       cloud-init:
-        curl http://worker:9200/{distro_path}/repo/casper/vmlinuz → 200
+        curl http://<pxe-ip>:9200/{distro_path}/repo/casper/vmlinuz → 200
 ```
 
 如果访问失败 → 提示用户需要:
@@ -86,7 +86,7 @@ GET /api/files → 已注册文件列表
 
 ```
 对 scripts/ 下的每个脚本:
-  └── curl http://worker:9200/api/pxe/scripts/{name} → 200 且内容非空
+  └── curl http://<pxe-ip>:9200/api/pxe/scripts/{name} → 200 且内容非空
 
 必须通过:
   ├── /api/pxe/scripts/pxe-pre.sh
@@ -99,7 +99,7 @@ GET /api/files → 已注册文件列表
 ## 校验输出格式
 
 ```
-=== Worker Validation: http://worker:9200 ===
+=== PXE Engine Validation: http://<pxe-ip>:9200 ===
 
 [OS Templates]
   ✓ tpl-euler03x64-std — openeuler.ks.cfg.j2 存在, ISO 已挂载, vmlinuz 可达
@@ -129,5 +129,5 @@ GET /api/files → 已注册文件列表
 ## 何时触发校验
 
 - Seed 完成后自动跑一次
-- 用户说"检查 worker"/"校验"/"validate"
+- 用户说"检查 pxe"/"校验"/"validate"
 - 创建装机任务前，对选中的 OS 做单条校验

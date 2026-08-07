@@ -12,7 +12,7 @@ description: |
 
 # Infra PXE Engine
 
-Worker = self-contained PXE engine (Go + SQLite). **所有操作通过 `infra-pxe` MCP 执行。**
+PXE Engine = self-contained provisioning service (Go + SQLite). **所有操作通过 `infra-pxe` MCP 执行。**
 
 **⚠️ 规则：**
 - 本 Skill 所有 tool 均使用 `infra-pxe` MCP（tool 前缀 `mcp__infra_pxe_*`），**禁止调用 `joyops-infra`**
@@ -23,7 +23,7 @@ Worker = self-contained PXE engine (Go + SQLite). **所有操作通过 `infra-px
 ## 操作流程（必须按此顺序）
 
 ```
-① 部署 Worker
+① 部署 PXE Engine
    └→ install.sh → 重启 session → MCP 连接
 
 ② 初始化
@@ -54,7 +54,7 @@ Worker = self-contained PXE engine (Go + SQLite). **所有操作通过 `infra-px
 
 ### 装机
 
-1. `system_status` → Worker 在线？dnsmasq 跑着？
+1. `system_status` → PXE Engine 在线？dnsmasq 跑着？
 2. `get_dhcp_config` → running=true？
 3. `list_os_templates` → 有模板？
 4. `validate_os_template` → ready=true？
@@ -65,7 +65,7 @@ Worker = self-contained PXE engine (Go + SQLite). **所有操作通过 `infra-px
    - `os` — 模板 bid（必填，从 list_os_templates 选）
    - `disk_target_size` — 磁盘大小 GB（默认 480，必问）
    - `network` — 网络配置 JSON（必有值且含 MAC：单口 network.mac / bond bond.slaves，见下方格式）
-   - DHCP 静态绑定不用在任务里配——用 worker MCP 的 `create_dhcp_binding` 单独管理
+   - DHCP 静态绑定不用在任务里配——用 infra-pxe MCP 的 `create_dhcp_binding` 单独管理
    - `root_password` — root 密码（有默认值，展示时用 *** 隐藏）
    - `ssh_keys` — SSH 公钥 JSON array（默认 []）
    - `partition` — 分区配置 JSON（默认 {}，用模板内置分区逻辑）
@@ -75,7 +75,14 @@ Worker = self-contained PXE engine (Go + SQLite). **所有操作通过 `infra-px
    > - root 密码: ***（有默认值，需要修改请告诉我）
    > - SSH 公钥: 无
    > - 分区: 自动（按 disk_target_size 选盘）
-6. `create_task` — scripts/files 自动从 os_template 继承，想换组合就改模板（`update_os_template`）
+6. **关键：任务生命周期规则** — 装机完成后 `provisionCompleteHandler` 会自动删除任务，只保留 `results` 历史记录。因此：
+   - `get_task` 返回 "not found"（或 `sql: no rows in result set`）时，**不要重建任务**。
+   - 先执行 `list_task_history`（按 sn 查）：
+     - 找到记录且 `status=installed` → 装机已完成，跳过，直接告知用户结果
+     - 只有 `event:xxx` 或 `partial` 记录 → 安装过程中被中断（异常情况），告知用户
+     - 完全无记录 → 确认需要创建新任务
+   - **禁止** 因 `get_task` 返回 not found 就盲目 `create_task`，这会创建重复任务
+
 7. **触发 PXE boot**：
    - 物理机：`ipmitool -I lanplus -H <bmc_ip> -U <user> -P <pass> chassis bootdev pxe && ipmitool ... power reset`
    - 虚拟机：`virsh destroy <vm> ; virsh start <vm>`（需要 VM 的 boot order 设为 PXE）
@@ -110,7 +117,7 @@ Worker = self-contained PXE engine (Go + SQLite). **所有操作通过 `infra-px
 
 **字段表**：`ip`（必填）、`netmask`（默认 255.255.254.0）、`gateway`、`dns`（list）、`mac`（单口网口 MAC）、`bond.mode`（int，4=802.3ad）、`bond.slaves`（list of MAC）、`bond.miimon`（默认 100）、`bond.lacp_rate`（默认 1）、`bond.xmit_hash_policy`（默认 layer3+4）。
 
-**统一规则：任务的所有 MAC 都在 network JSON 里，没有顶层 mac**。单口 = `network.mac`（1 个）；bond = `network.bond.slaves`（2 个）。`/boot/mac` 匹配从 network 读：单口命中 network.mac，bond 命中两个 slaves（PXE 从任意一块口启动都能出脚本）。**DHCP 静态绑定与任务无关**——需要固定 IP 用 worker MCP `create_dhcp_binding` 单独配（`POST /api/dhcp/bindings`），任务创建/删除不碰 hostsfile。
+**统一规则：任务的所有 MAC 都在 network JSON 里，没有顶层 mac**。单口 = `network.mac`（1 个）；bond = `network.bond.slaves`（2 个）。`/boot/mac` 匹配从 network 读：单口命中 network.mac，bond 命中两个 slaves（PXE 从任意一块口启动都能出脚本）。**DHCP 静态绑定与任务无关**——需要固定 IP 用 infra-pxe MCP `create_dhcp_binding` 单独配（`POST /api/dhcp/bindings`），任务创建/删除不碰 hostsfile。
 
 **易错点**：`bond` 是**对象**不是布尔（`"bond": true` 会静默入库、装机时脚本崩溃）；没有 `bond_name`/`bond_mode` 字段（bond0 硬编码、802.3ad 用 `mode: 4`）。
 
@@ -142,7 +149,7 @@ systemctl daemon-reload
 systemctl enable --now arp_dual_send.service
 ```
 
-也可通过 worker post-install script 批量部署。
+也可通过 post-install script 批量部署。
 
 ### 初始化
 
@@ -179,12 +186,12 @@ systemctl enable --now arp_dual_send.service
 
 **文件**（大文件）：
 1. **问用户**：文件在目标机器的路径？bid？dest_dir？
-2. SSH: `mkdir -p /joyops/infra/worker/boot/http/{bid} && ln -sf {路径} /joyops/infra/worker/boot/http/{bid}/`
+2. SSH: `mkdir -p /joyops/infra/pxe/boot/http/{bid} && ln -sf {路径} /joyops/infra/pxe/boot/http/{bid}/`
 3. `create_file` 注册元数据
 4. `update_os_template` 绑定 file_bids
 5. `validate_os_template` 确认
 
-> 路径规则：`boot/http/{bid}/{filename}` → HTTP 可访问 `http://worker:9200/{bid}/{filename}`
+> 路径规则：`boot/http/{bid}/{filename}` → HTTP 可访问 `http://<pxe-ip>:9200/{bid}/{filename}`
 
 **ISO 管理注意事项：**
 - os_template 的 `iso_path` = 期望的 ISO **文件名**
@@ -192,7 +199,7 @@ systemctl enable --now arp_dual_send.service
 - ISO 实际文件名跟模板 iso_path 不一致时，**必须问用户选择**：
   - **A. 改软连接名**（推荐，不动模板）：
     ```bash
-    ln -sf /实际路径/xxx-everything.iso /joyops/infra/worker/boot/iso/{模板期望的文件名}
+    ln -sf /实际路径/xxx-everything.iso /joyops/infra/pxe/boot/iso/{模板期望的文件名}
     ```
   - **B. 改模板**（换 OS 变体时）：`update_os_template` 改 iso_path + distro_path → 重新 mount
   - **禁止自动选择**，必须让用户决定
@@ -201,7 +208,7 @@ systemctl enable --now arp_dual_send.service
 ### 部署
 
 1. 问 target IP、架构
-2. `bash release/pack-worker.sh`
+2. `bash release/pack.sh`
 3. `scp + ssh install.sh`（不需要 `-i`）
 4. `curl http://<ip>:9200/api/health` 验证
 5. 提醒：重启 session 连接 MCP
@@ -209,7 +216,7 @@ systemctl enable --now arp_dual_send.service
 ### 卸载
 
 ```bash
-ssh root@<ip> "/joyops/infra/worker/uninstall.sh -y"
+ssh root@<ip> "/joyops/infra/pxe/uninstall.sh -y"
 ```
 
 ---
@@ -218,7 +225,7 @@ ssh root@<ip> "/joyops/infra/worker/uninstall.sh -y"
 
 | 状态 | 提醒 |
 |------|------|
-| Worker 不在线 | 部署或 `systemctl start infra-worker` |
+| PXE Engine 不在线 | 部署或 `systemctl start infra-pxe` |
 | 没有 OS 模板 | `seed_import` |
 | ISO 未挂载 | 问用户 ISO 路径 → 软连接 → `mount_iso` |
 | DHCP 没配 | 问用户网段 → `dhcp_config_update` |

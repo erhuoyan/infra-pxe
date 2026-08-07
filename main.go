@@ -60,7 +60,7 @@ func main() {
 	// HTTP handler (CRUD API + PXE rendering + static files)
 	mux := handler.New(cfg, taskStore, dnsmasqMgr, cancel)
 
-	addr := net.JoinHostPort(cfg.ListenAddr(), strconv.Itoa(cfg.Server.Port))
+	addr := net.JoinHostPort(cfg.ListenAddr(), strconv.Itoa(cfg.Engine.Port))
 	srv := &http.Server{
 		Addr:         addr,
 		Handler:      mux,

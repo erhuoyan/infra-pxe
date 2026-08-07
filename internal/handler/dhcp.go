@@ -47,14 +47,14 @@ type dhcpConfig struct {
 }
 
 type dhcpConfigUpdate struct {
-	Interface  string `json:"interface"`
-	DhcpStart  string `json:"dhcp_start"`
-	DhcpEnd    string `json:"dhcp_end"`
-	Netmask    string `json:"netmask"`
-	Gateway    string `json:"gateway"`
-	Dns        string `json:"dns"`
-	LeaseTime  string `json:"lease_time"`
-	EnableDns  bool   `json:"enable_dns"`
+	Interface string `json:"interface"`
+	DhcpStart string `json:"dhcp_start"`
+	DhcpEnd   string `json:"dhcp_end"`
+	Netmask   string `json:"netmask"`
+	Gateway   string `json:"gateway"`
+	Dns       string `json:"dns"`
+	LeaseTime string `json:"lease_time"`
+	EnableDns bool   `json:"enable_dns"`
 }
 
 // --- DHCP handlers ---
@@ -272,7 +272,7 @@ func dhcpConfigUpdateHandler(cfg *config.Config, s *store.Store, d *dnsmasq.Mana
 		pxeIP, _ := s.DB.GetPxeServer()
 		if pxeIP == "" || pxeIP == "127.0.0.1" {
 			if ifIP := getInterfaceIP(update.Interface); ifIP != "" {
-				s.DB.SetPxeServer(ifIP, strconv.Itoa(cfg.Server.Port))
+				s.DB.SetPxeServer(ifIP, strconv.Itoa(cfg.Engine.Port))
 			}
 		}
 

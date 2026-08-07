@@ -1,6 +1,6 @@
 # Templates API — 装机模板 (kickstart/cloud-init/scripts)
 
-模板存储在 Worker 文件系统 `templates/` 目录，API 读写文件。
+模板存储在 PXE Engine 文件系统 `templates/` 目录，API 读写文件。
 
 ## POST /api/templates — 上传/更新模板
 

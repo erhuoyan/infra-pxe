@@ -30,14 +30,14 @@
 
 若不指定 `distro_path`，用文件名（去扩展名）作为挂载路径。
 
-挂载后 ISO 内容通过 `http://worker:9200/{distro_path}/repo/` 访问。
+挂载后 ISO 内容通过 `http://<pxe-ip>:9200/{distro_path}/repo/` 访问。
 
 **Response:**
 ```json
 {
   "iso": "openEuler-...-dvd.iso",
   "distro_path": "openeuler/.../x86_64",
-  "repo_path": "/joyops/infra/worker/boot/http/openeuler/.../repo",
+  "repo_path": "/joyops/infra/pxe/boot/http/openeuler/.../repo",
   "status": "mounted"
 }
 ```
@@ -62,7 +62,7 @@
 ```
 1. ISO 文件放到 boot/iso/ (或软链接进去)
 2. POST /api/iso/mount → 挂载到 boot/http/{distro_path}/repo/
-3. 目标机 PXE 启动 → HTTP 拉 http://worker:9200/{distro_path}/repo/images/pxeboot/vmlinuz
+3. 目标机 PXE 启动 → HTTP 拉 http://<pxe-ip>:9200/{distro_path}/repo/images/pxeboot/vmlinuz
 ```
 
 **distro_path 必须匹配 os_template.distro_path**，否则装机时找不到 kernel/initrd。

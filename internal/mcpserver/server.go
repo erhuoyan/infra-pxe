@@ -59,9 +59,9 @@ func registerTaskTools(server *mcp.Server, s *store.Store, d *dnsmasq.Manager) {
 	})
 
 	// get_task
-type GetTaskInput struct {
-SN string `json:"sn" jsonschema:"Serial number of the task to retrieve"`
-}
+	type GetTaskInput struct {
+		SN string `json:"sn" jsonschema:"Serial number of the task to retrieve"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "get_task",
 		Description: "Get a deployment task by serial number",
@@ -77,17 +77,17 @@ SN string `json:"sn" jsonschema:"Serial number of the task to retrieve"`
 	})
 
 	// create_task
-type CreateTaskInput struct {
-SN             string `json:"sn" jsonschema:"Serial number (required)"`
-Hostname       string `json:"hostname" jsonschema:"Target hostname (required)"`
-IP             string `json:"ip" jsonschema:"Target IP address (required)"`
-OS             string `json:"os" jsonschema:"OS template bid (required)"`
-RootPassword   string `json:"root_password" jsonschema:"Root password (default: CentOS@2026)"`
-DiskTargetSize int    `json:"disk_target_size" jsonschema:"Disk target size in GB (default: 480)"`
-Network        string `json:"network" jsonschema:"Network JSON (必填，必须有值，含 MAC: 单口 mac / bond slaves). 单口: {\"mac\":\"xx\",\"ip\":\"1.2.3.4\"}. Bond: {\"ip\":\"1.2.3.4\",\"bond\":{\"mode\":4,\"slaves\":[\"mac1\",\"mac2\"]}}"`
-Partition      string `json:"partition" jsonschema:"Partition config JSON string (default: {})"`
-SSHKeys        string `json:"ssh_keys" jsonschema:"SSH keys JSON array"`
-}
+	type CreateTaskInput struct {
+		SN             string `json:"sn" jsonschema:"Serial number (required)"`
+		Hostname       string `json:"hostname" jsonschema:"Target hostname (required)"`
+		IP             string `json:"ip" jsonschema:"Target IP address (required)"`
+		OS             string `json:"os" jsonschema:"OS template bid (required)"`
+		RootPassword   string `json:"root_password" jsonschema:"Root password (default: CentOS@2026)"`
+		DiskTargetSize int    `json:"disk_target_size" jsonschema:"Disk target size in GB (default: 480)"`
+		Network        string `json:"network" jsonschema:"Network JSON (必填，必须有值，含 MAC: 单口 mac / bond slaves). 单口: {\"mac\":\"xx\",\"ip\":\"1.2.3.4\"}. Bond: {\"ip\":\"1.2.3.4\",\"bond\":{\"mode\":4,\"slaves\":[\"mac1\",\"mac2\"]}}"`
+		Partition      string `json:"partition" jsonschema:"Partition config JSON string (default: {})"`
+		SSHKeys        string `json:"ssh_keys" jsonschema:"SSH keys JSON array"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "create_task",
 		Description: "Create a new PXE deployment task",
@@ -100,7 +100,7 @@ SSHKeys        string `json:"ssh_keys" jsonschema:"SSH keys JSON array"`
 				"os":               map[string]any{"type": "string", "description": "OS template bid (required)"},
 				"root_password":    map[string]any{"type": "string", "description": "Root password (default: CentOS@2026)"},
 				"disk_target_size": map[string]any{"type": "integer", "description": "Disk target size in GB (default: 480)"},
-				"network":         map[string]any{"type": "string", "description": "Network JSON (必填，含 MAC). 单口: {\"mac\":\"xx\",\"ip\":\"1.2.3.4\"}. Bond: {\"ip\":\"1.2.3.4\",\"bond\":{\"mode\":4,\"slaves\":[\"mac1\",\"mac2\"]}}"},
+				"network":          map[string]any{"type": "string", "description": "Network JSON (必填，含 MAC). 单口: {\"mac\":\"xx\",\"ip\":\"1.2.3.4\"}. Bond: {\"ip\":\"1.2.3.4\",\"bond\":{\"mode\":4,\"slaves\":[\"mac1\",\"mac2\"]}}"},
 				"partition":        map[string]any{"type": "string", "description": "Partition config JSON string (default: {})"},
 				"ssh_keys":         map[string]any{"type": "string", "description": "SSH keys JSON array"},
 			},
@@ -145,9 +145,9 @@ SSHKeys        string `json:"ssh_keys" jsonschema:"SSH keys JSON array"`
 	})
 
 	// delete_task
-type DeleteTaskInput struct {
-SN string `json:"sn" jsonschema:"Serial number of the task to delete"`
-}
+	type DeleteTaskInput struct {
+		SN string `json:"sn" jsonschema:"Serial number of the task to delete"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "delete_task",
 		Description: "Delete a deployment task by serial number",
@@ -163,9 +163,9 @@ SN string `json:"sn" jsonschema:"Serial number of the task to delete"`
 	})
 
 	// list_task_history
-type ListHistoryInput struct {
-SN string `json:"sn" jsonschema:"Filter by serial number (optional, empty returns all)"`
-}
+	type ListHistoryInput struct {
+		SN string `json:"sn" jsonschema:"Filter by serial number (optional, empty returns all)"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_task_history",
 		Description: "List completed/failed install history (tasks are removed after completion, history is preserved here)",
@@ -219,11 +219,11 @@ func registerDHCPTools(server *mcp.Server, cfg *config.Config, d *dnsmasq.Manage
 	})
 
 	// create_dhcp_binding
-type CreateBindingInput struct {
-MAC      string `json:"mac" jsonschema:"MAC address (required)"`
-IP       string `json:"ip" jsonschema:"IP address to bind (required)"`
-Hostname string `json:"hostname" jsonschema:"Optional hostname for the binding"`
-}
+	type CreateBindingInput struct {
+		MAC      string `json:"mac" jsonschema:"MAC address (required)"`
+		IP       string `json:"ip" jsonschema:"IP address to bind (required)"`
+		Hostname string `json:"hostname" jsonschema:"Optional hostname for the binding"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "create_dhcp_binding",
 		Description: "Create a static DHCP MAC-to-IP binding",
@@ -274,9 +274,9 @@ Hostname string `json:"hostname" jsonschema:"Optional hostname for the binding"`
 	})
 
 	// delete_dhcp_binding
-type DeleteBindingInput struct {
-MAC string `json:"mac" jsonschema:"MAC address of the binding to delete"`
-}
+	type DeleteBindingInput struct {
+		MAC string `json:"mac" jsonschema:"MAC address of the binding to delete"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "delete_dhcp_binding",
 		Description: "Delete a static DHCP binding by MAC address",
@@ -378,7 +378,7 @@ func registerSystemTools(server *mcp.Server, s *store.Store, d *dnsmasq.Manager)
 		Description: "Get PXE system status including dnsmasq state",
 	}, func(ctx context.Context, req *mcp.CallToolRequest, input *NoInput) (*mcp.CallToolResult, any, error) {
 		status := map[string]any{
-			"pxe":            "running",
+			"pxe":             "running",
 			"dnsmasq":         d.Status(),
 			"pending_results": s.PendingResultsCount(),
 		}
@@ -469,11 +469,11 @@ func registerISOTools(server *mcp.Server, cfg *config.Config, s *store.Store) {
 	})
 
 	// mount_iso
-type MountISOInput struct {
-Bid        string `json:"bid" jsonschema:"OS template bid — auto-resolves filename and distro_path (preferred over manual)"`
-Filename   string `json:"filename" jsonschema:"ISO filename (used if bid not provided)"`
-DistroPath string `json:"distro_path" jsonschema:"Mount path (used if bid not provided)"`
-}
+	type MountISOInput struct {
+		Bid        string `json:"bid" jsonschema:"OS template bid — auto-resolves filename and distro_path (preferred over manual)"`
+		Filename   string `json:"filename" jsonschema:"ISO filename (used if bid not provided)"`
+		DistroPath string `json:"distro_path" jsonschema:"Mount path (used if bid not provided)"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "mount_iso",
 		Description: "Mount an ISO for PXE serving. Pass bid to auto-resolve from OS template, or filename+distro_path manually.",
@@ -540,7 +540,6 @@ DistroPath string `json:"distro_path" jsonschema:"Mount path (used if bid not pr
 	})
 }
 
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // OS Template tools
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -559,9 +558,9 @@ func registerOSTemplateTools(server *mcp.Server, s *store.Store) {
 	})
 
 	// validate_os_template
-type ValidateOSTemplateInput struct {
-Bid string `json:"bid" jsonschema:"OS template bid to validate (e.g. tpl-ubuntu2204-x64)"`
-}
+	type ValidateOSTemplateInput struct {
+		Bid string `json:"bid" jsonschema:"OS template bid to validate (e.g. tpl-ubuntu2204-x64)"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "validate_os_template",
 		Description: "Validate that all physical resources (ISO, mount, template, scripts, files) for an OS template are present and ready",
@@ -574,14 +573,14 @@ Bid string `json:"bid" jsonschema:"OS template bid to validate (e.g. tpl-ubuntu2
 	})
 
 	// update_os_template
-type UpdateOSTemplateInput struct {
-Bid        string  `json:"bid" jsonschema:"OS template bid to update (required)"`
-Label      *string `json:"label" jsonschema:"Display label"`
-ScriptBids *string `json:"script_bids" jsonschema:"Comma-separated script bids (e.g. scr-install-ofed,scr-setup-net)"`
-FileBids   *string `json:"file_bids" jsonschema:"Comma-separated file bids (e.g. fil-ofed58203-arm,fil-gpu-driver)"`
-KernelArgs *string `json:"kernel_args" jsonschema:"Kernel boot arguments"`
-MirrorURL  *string `json:"mirror_url" jsonschema:"Mirror URL for network install"`
-}
+	type UpdateOSTemplateInput struct {
+		Bid        string  `json:"bid" jsonschema:"OS template bid to update (required)"`
+		Label      *string `json:"label" jsonschema:"Display label"`
+		ScriptBids *string `json:"script_bids" jsonschema:"Comma-separated script bids (e.g. scr-install-ofed,scr-setup-net)"`
+		FileBids   *string `json:"file_bids" jsonschema:"Comma-separated file bids (e.g. fil-ofed58203-arm,fil-gpu-driver)"`
+		KernelArgs *string `json:"kernel_args" jsonschema:"Kernel boot arguments"`
+		MirrorURL  *string `json:"mirror_url" jsonschema:"Mirror URL for network install"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "update_os_template",
 		Description: "Update an OS template's fields (label, script_bids, file_bids, kernel_args, mirror_url)",
@@ -652,13 +651,13 @@ MirrorURL  *string `json:"mirror_url" jsonschema:"Mirror URL for network install
 	})
 
 	// create_script
-type CreateScriptInput struct {
-Bid         string `json:"bid" jsonschema:"Script bid (e.g. scr-install-ofed)"`
-Name        string `json:"name" jsonschema:"Script display name"`
-ScriptType  *string `json:"script_type" jsonschema:"Interpreter: bash, python, sh (default: bash)"`
-Description *string `json:"description" jsonschema:"Script description"`
-Content     string `json:"content" jsonschema:"Script content (full source code)"`
-}
+	type CreateScriptInput struct {
+		Bid         string  `json:"bid" jsonschema:"Script bid (e.g. scr-install-ofed)"`
+		Name        string  `json:"name" jsonschema:"Script display name"`
+		ScriptType  *string `json:"script_type" jsonschema:"Interpreter: bash, python, sh (default: bash)"`
+		Description *string `json:"description" jsonschema:"Script description"`
+		Content     string  `json:"content" jsonschema:"Script content (full source code)"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "create_script",
 		Description: "Create or update a post-install script (stored in DB, executed during OS install)",
@@ -708,11 +707,11 @@ Content     string `json:"content" jsonschema:"Script content (full source code)
 	})
 
 	// create_file
-type CreateFileInput struct {
-Bid      string  `json:"bid" jsonschema:"File bid (e.g. fil-ofed58203-arm)"`
-Filename string  `json:"filename" jsonschema:"File name (e.g. MLNX_OFED_LINUX-5.8-2.0.3.0-openeuler22.03-aarch64.tar)"`
-DestDir  *string `json:"dest_dir" jsonschema:"Destination directory on target machine (default: /tmp/drivers)"`
-}
+	type CreateFileInput struct {
+		Bid      string  `json:"bid" jsonschema:"File bid (e.g. fil-ofed58203-arm)"`
+		Filename string  `json:"filename" jsonschema:"File name (e.g. MLNX_OFED_LINUX-5.8-2.0.3.0-openeuler22.03-aarch64.tar)"`
+		DestDir  *string `json:"dest_dir" jsonschema:"Destination directory on target machine (default: /tmp/drivers)"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "create_file",
 		Description: "Register a post-install file (metadata). Physical file must be placed in boot/http/{bid}/ directory.",
@@ -801,9 +800,9 @@ func registerExtraTools(server *mcp.Server, cfg *config.Config, s *store.Store, 
 	})
 
 	// seed_import
-type SeedImportInput struct {
-Overwrite bool `json:"overwrite" jsonschema:"Force overwrite existing OS templates (default: false)"`
-}
+	type SeedImportInput struct {
+		Overwrite bool `json:"overwrite" jsonschema:"Force overwrite existing OS templates (default: false)"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "seed_import",
 		Description: "Import bundled seed data (OS templates from seeds/*.yaml). Idempotent.",
@@ -855,16 +854,16 @@ Overwrite bool `json:"overwrite" jsonschema:"Force overwrite existing OS templat
 	})
 
 	// dhcp_config_update
-type DhcpConfigUpdateInput struct {
-Interface string  `json:"interface" jsonschema:"Network interface for DHCP (e.g. br-pxe, eth0),required"`
-DhcpStart string  `json:"dhcp_start" jsonschema:"DHCP range start IP,required"`
-DhcpEnd   string  `json:"dhcp_end" jsonschema:"DHCP range end IP,required"`
-Netmask   string  `json:"netmask" jsonschema:"Subnet mask (e.g. 255.255.255.0),required"`
-Gateway   string  `json:"gateway" jsonschema:"Gateway IP,required"`
-Dns       *string `json:"dns" jsonschema:"DNS server IP (optional)"`
-LeaseTime *string `json:"lease_time" jsonschema:"DHCP lease time (e.g. 5m, 1h). Default: 5m"`
-EnableDns *bool   `json:"enable_dns" jsonschema:"Enable DNS forwarding (default: false)"`
-}
+	type DhcpConfigUpdateInput struct {
+		Interface string  `json:"interface" jsonschema:"Network interface for DHCP (e.g. br-pxe, eth0),required"`
+		DhcpStart string  `json:"dhcp_start" jsonschema:"DHCP range start IP,required"`
+		DhcpEnd   string  `json:"dhcp_end" jsonschema:"DHCP range end IP,required"`
+		Netmask   string  `json:"netmask" jsonschema:"Subnet mask (e.g. 255.255.255.0),required"`
+		Gateway   string  `json:"gateway" jsonschema:"Gateway IP,required"`
+		Dns       *string `json:"dns" jsonschema:"DNS server IP (optional)"`
+		LeaseTime *string `json:"lease_time" jsonschema:"DHCP lease time (e.g. 5m, 1h). Default: 5m"`
+		EnableDns *bool   `json:"enable_dns" jsonschema:"Enable DNS forwarding (default: false)"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "dhcp_config_update",
 		Description: "Configure DHCP settings (interface, IP range, gateway). Persists to DB and restarts dnsmasq.",
@@ -918,7 +917,7 @@ EnableDns *bool   `json:"enable_dns" jsonschema:"Enable DNS forwarding (default:
 		pxeIP, _ := s.DB.GetPxeServer()
 		if pxeIP == "" || pxeIP == "127.0.0.1" {
 			if ifIP := getIfaceIP(input.Interface); ifIP != "" {
-				s.DB.SetPxeServer(ifIP, fmt.Sprintf("%d", cfg.Server.Port))
+				s.DB.SetPxeServer(ifIP, fmt.Sprintf("%d", cfg.Engine.Port))
 			}
 		}
 
@@ -947,10 +946,10 @@ EnableDns *bool   `json:"enable_dns" jsonschema:"Enable DNS forwarding (default:
 	})
 
 	// iso_download
-type ISODownloadInput struct {
-URL      string `json:"url" jsonschema:"Download URL for the ISO file"`
-Filename string `json:"filename" jsonschema:"Target filename (optional, derived from URL if empty)"`
-}
+	type ISODownloadInput struct {
+		URL      string `json:"url" jsonschema:"Download URL for the ISO file"`
+		Filename string `json:"filename" jsonschema:"Target filename (optional, derived from URL if empty)"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "iso_download",
 		Description: "Download an ISO file from URL to the boot/iso/ directory (background, returns immediately)",
@@ -1003,10 +1002,10 @@ Filename string `json:"filename" jsonschema:"Target filename (optional, derived 
 	})
 
 	// template_push
-type TemplatePushInput struct {
-Name    string `json:"name" jsonschema:"Template filename (e.g. openeuler.ks.cfg.j2, scripts/pxe-pre.sh)"`
-Content string `json:"content" jsonschema:"Template file content"`
-}
+	type TemplatePushInput struct {
+		Name    string `json:"name" jsonschema:"Template filename (e.g. openeuler.ks.cfg.j2, scripts/pxe-pre.sh)"`
+		Content string `json:"content" jsonschema:"Template file content"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "template_push",
 		Description: "Create or update a kickstart/cloud-init template file",
@@ -1025,6 +1024,7 @@ Content string `json:"content" jsonschema:"Template file content"`
 		return nil, map[string]any{"name": input.Name, "status": "saved"}, nil
 	})
 }
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Helpers (copied from handler/dhcp.go to avoid circular imports)
 // ═══════════════════════════════════════════════════════════════════════════════

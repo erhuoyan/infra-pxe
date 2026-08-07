@@ -65,8 +65,8 @@ JSON 字符串数组，装完后下载到目标机：
 ```json
 [{"url":"/fil-demo01/driver.rpm","filename":"driver.rpm","dest":"/root/driver.rpm"}]
 ```
-`url` — Worker HTTP 相对路径（文件在 `boot/http/` 下，HTTP 从 `/` 起）。
-需先用 `POST /api/files/pull` 或 `/api/files/upload` 把文件放到 Worker。
+`url` — PXE Engine HTTP 相对路径（文件在 `boot/http/` 下，HTTP 从 `/` 起）。
+需先用 `POST /api/files/pull` 或 `/api/files/upload` 把文件放到 PXE Engine。
 `"[]"` = 不下载。
 
 ### 完整示例

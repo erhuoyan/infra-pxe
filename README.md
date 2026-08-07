@@ -53,7 +53,7 @@ ssh root@target 'tar xzf /tmp/infra-pxe-*.tar.gz -C /tmp && /tmp/infra-pxe/insta
 ### Minimal config (`conf/pxe.yaml`)
 
 ```yaml
-server:
+engine:
   listen: "0.0.0.0"
   port: 9200
 
@@ -152,7 +152,7 @@ Then configure the MCP server in your `.claude/mcp.json` (or project `.mcp.json`
   "mcpServers": {
     "infra-pxe": {
       "type": "http",
-      "url": "http://<your-worker-ip>:9200/mcp"
+      "url": "http://<your-pxe-ip>:9200/mcp"
     }
   }
 }
@@ -162,7 +162,7 @@ Then configure the MCP server in your `.claude/mcp.json` (or project `.mcp.json`
 
 The skill (`SKILL.md`) guides Claude through the full PXE lifecycle:
 
-- Deploy worker binary to target machine
+- Deploy PXE Engine binary to target machine
 - Initialize seed data, DHCP config, ISO mounts
 - Create install tasks with network config
 - Validate templates before kicking off PXE boot

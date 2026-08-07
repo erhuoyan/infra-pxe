@@ -5,13 +5,13 @@ ACTION=$1; MAC=$2; IP=$3; HOST=$4
 [ -z "$MAC" ] && exit 0
 
 NOW=$(date +%Y-%m-%dT%H:%M:%S)
-WORKER_API="http://127.0.0.1:9200"
-API_URL="${WORKER_API}/api/pxe/event"
+PXE_API="http://127.0.0.1:9200"
+API_URL="${PXE_API}/api/pxe/event"
 
 # Try to resolve SN by MAC (provision_by-mac)
 SN=""
 if [ "$ACTION" = "add" ]; then
-    RESP=$(curl -s --connect-timeout 3 "${WORKER_API}/api/provision/by-mac/${MAC}" 2>/dev/null)
+    RESP=$(curl -s --connect-timeout 3 "${PXE_API}/api/provision/by-mac/${MAC}" 2>/dev/null)
     SN=$(echo "$RESP" | python3 -c "import sys,json;d=json.load(sys.stdin);print(d.get('sn',''))" 2>/dev/null)
 fi
 

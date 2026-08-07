@@ -229,7 +229,7 @@ func syncHandler(cfg *config.Config, s *store.Store, d *dnsmasq.Manager) http.Ha
 func statusHandler(s *store.Store, d *dnsmasq.Manager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		jsonOK(w, map[string]any{
-			"pxe":            "running",
+			"pxe":             "running",
 			"dnsmasq":         d.Status(),
 			"pending_results": s.PendingResultsCount(),
 		})
@@ -256,7 +256,6 @@ func dnsmasqReloadHandler(d *dnsmasq.Manager) http.HandlerFunc {
 		jsonOK(w, map[string]string{"status": "reloaded"})
 	}
 }
-
 
 func provisionBySNHandler(s *store.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -377,7 +376,6 @@ func hardwareHandler(cfg *config.Config, s *store.Store) http.HandlerFunc {
 	}
 }
 
-
 // pxeServerAddr returns the address target machines use to reach this PXE server.
 // Priority: DB pxe_server_ip > DB dhcp_interface IP > 127.0.0.1
 func pxeServerAddr(cfg *config.Config, s *store.Store) (ip, port string) {
@@ -389,10 +387,10 @@ func pxeServerAddr(cfg *config.Config, s *store.Store) (ip, port string) {
 	ifName := s.DB.GetInterface()
 	if ifName != "" {
 		if ifIP := getInterfaceIP(ifName); ifIP != "" {
-			return ifIP, strconv.Itoa(cfg.Server.Port)
+			return ifIP, strconv.Itoa(cfg.Engine.Port)
 		}
 	}
-	return "127.0.0.1", strconv.Itoa(cfg.Server.Port)
+	return "127.0.0.1", strconv.Itoa(cfg.Engine.Port)
 }
 func menuHandler(cfg *config.Config, s *store.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -743,18 +741,18 @@ func provisionByMACHandler(s *store.Store) http.HandlerFunc {
 
 // stageToStatus maps pxe event stages to task status.
 var stageToStatus = map[string]string{
-	"sn_identifying":    "installing",
-	"provision_matching": "installing",
-	"disk_selected":     "installing",
-	"pkg_installing":    "installing",
-	"post_start":        "configured",
-	"network_configured": "configured",
-	"ssh_keys_injected": "configured",
-	"files_injecting":   "configured",
-	"script_executing":  "configured",
+	"sn_identifying":      "installing",
+	"provision_matching":  "installing",
+	"disk_selected":       "installing",
+	"pkg_installing":      "installing",
+	"post_start":          "configured",
+	"network_configured":  "configured",
+	"ssh_keys_injected":   "configured",
+	"files_injecting":     "configured",
+	"script_executing":    "configured",
 	"hardware_collecting": "configured",
-	"install_completing": "configured",
-	"provision_failed":  "failed",
+	"install_completing":  "configured",
+	"provision_failed":    "failed",
 }
 
 func pxeEventHandler(cfg *config.Config, s *store.Store) http.HandlerFunc {

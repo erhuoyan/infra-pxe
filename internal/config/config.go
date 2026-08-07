@@ -8,7 +8,7 @@ import (
 )
 
 type Config struct {
-	Server  ServerSection  `yaml:"server"`
+	Engine  EngineSection  `yaml:"engine"`
 	Dnsmasq DnsmasqSection `yaml:"dnsmasq"`
 	Data    DataSection    `yaml:"data"`
 	Paths   PathsSection   `yaml:"paths"`
@@ -26,9 +26,8 @@ type WebhookSection struct {
 	Token string `yaml:"token"`
 }
 
-
-type ServerSection struct {
-	Listen    string `yaml:"listen"`    // IP to bind (default 0.0.0.0)
+type EngineSection struct {
+	Listen    string `yaml:"listen"` // IP to bind (default 0.0.0.0)
 	Port      int    `yaml:"port"`
 	Interface string `yaml:"interface"` // Deprecated: DHCP interface now stored in DB. Kept for yaml parse compat.
 	Name      string `yaml:"name"`      // Instance name (for identification)
@@ -109,8 +108,8 @@ func (c *Config) TemplatesDir() string {
 
 // ListenAddr returns the resolved listen address.
 func (c *Config) ListenAddr() string {
-	if c.Server.Listen != "" {
-		return c.Server.Listen
+	if c.Engine.Listen != "" {
+		return c.Engine.Listen
 	}
 	return "0.0.0.0"
 }
@@ -135,8 +134,8 @@ func Load(path string) (*Config, error) {
 	cfg.BaseDir = cwd
 
 	// Defaults
-	if cfg.Server.Port == 0 {
-		cfg.Server.Port = 9200
+	if cfg.Engine.Port == 0 {
+		cfg.Engine.Port = 9200
 	}
 	if cfg.Dnsmasq.Binary == "" {
 		cfg.Dnsmasq.Binary = "dnsmasq"

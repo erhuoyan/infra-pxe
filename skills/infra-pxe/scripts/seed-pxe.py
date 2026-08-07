@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-seed-worker.py — 触发 Worker 导入自带 seed 数据
+seed-pxe.py — 触发 PXE Engine 导入自带 seed 数据
 
 用法:
-    ./seed-worker.py <worker_url>                   # 默认不覆盖已有
-    ./seed-worker.py <worker_url> --overwrite       # 强制覆盖
+    ./seed-pxe.py <pxe_url>                   # 默认不覆盖已有
+    ./seed-pxe.py <pxe_url> --overwrite       # 强制覆盖
 
-Worker 部署后自带 seeds/ 和 templates/ 目录，此脚本只是调用
-POST /api/seed/import 让 Worker 把本地文件导入 DB。
+PXE Engine 部署后自带 seeds/ 和 templates/ 目录，此脚本只是调用
+POST /api/seed/import 让 PXE Engine 把本地文件导入 DB。
 
 与 Controller 配套使用时无需 seed — Controller 会通过 /api/os-templates
-和 /api/templates 接口按需推送。此脚本用于独立 Worker 场景。
+和 /api/templates 接口按需推送。此脚本用于独立 PXE Engine 场景。
 """
 from __future__ import annotations
 
@@ -22,12 +22,12 @@ import urllib.request
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Trigger Worker seed import.")
-    ap.add_argument("worker_url", help="e.g. http://192.168.1.240:9200")
+    ap = argparse.ArgumentParser(description="Trigger PXE Engine seed import.")
+    ap.add_argument("pxe_url", help="e.g. http://192.168.1.240:9200")
     ap.add_argument("--overwrite", action="store_true", help="overwrite existing OS templates")
     args = ap.parse_args()
 
-    url = args.worker_url.rstrip("/") + "/api/seed/import"
+    url = args.pxe_url.rstrip("/") + "/api/seed/import"
     if args.overwrite:
         url += "?overwrite=true"
 
