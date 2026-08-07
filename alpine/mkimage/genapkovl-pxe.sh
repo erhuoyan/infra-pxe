@@ -120,7 +120,7 @@ name="infra-pxe"
 description="Infra PXE Engine"
 
 command="/srv/infra/pxe/bin/infra-pxe"
-command_args="--config /srv/infra/pxe/conf/pxe.yaml"
+command_args="serve --config /srv/infra/pxe/conf/pxe.yaml"
 command_background="yes"
 pidfile="/run/infra-pxe.pid"
 directory="/srv/infra/pxe"
@@ -197,7 +197,7 @@ else
 fi
 
 echo "[3/3] Starting PXE Engine..."
-rc-service infra-pxe restart 2>/dev/null || { cd "$PXE_DIR"; ./bin/infra-pxe --config conf/pxe.yaml >> logs/pxe.log 2>&1 & sleep 2; }
+rc-service infra-pxe restart 2>/dev/null || { cd "$PXE_DIR"; ./bin/infra-pxe serve --config conf/pxe.yaml >> logs/pxe.log 2>&1 & sleep 2; }
 sleep 1
 curl -sf http://127.0.0.1:9200/api/health >/dev/null 2>&1 && echo "       ✓" || echo "       ⚠ check: $PXE_DIR/logs/pxe.log"
 
@@ -244,7 +244,7 @@ show_status() {
 restart_pxe() {
     rc-service infra-pxe restart 2>/dev/null && { sleep 1; echo "   ✓ restarted"; return; }
     pkill -f "infra-pxe" 2>/dev/null || true; sleep 1
-    cd "$PXE_DIR"; ./bin/infra-pxe --config conf/pxe.yaml >> logs/pxe.log 2>&1 & sleep 1
+    cd "$PXE_DIR"; ./bin/infra-pxe serve --config conf/pxe.yaml >> logs/pxe.log 2>&1 & sleep 1
     pgrep -f "infra-pxe" >/dev/null && echo "   ✓ restarted" || echo "   ⚠ failed"
 }
 case "${1:-}" in
@@ -345,7 +345,7 @@ case "${1:-backup}" in
         printf "Stop and restore? [y/N] "; read -r c; [ "$c" != "y" ] && [ "$c" != "Y" ] && { echo "Cancelled"; exit 0; }
         rc-service infra-pxe stop 2>/dev/null || pkill -f "infra-pxe" 2>/dev/null || true; sleep 1
         [ -f "$DB" ] && cp "$DB" "$DB.pre-restore.$(date +%Y%m%d-%H%M%S)"; cp "$F" "$DB"; echo "✓ Restored"
-        rc-service infra-pxe start 2>/dev/null || { cd "$PXE_DIR"; ./bin/infra-pxe --config conf/pxe.yaml >> logs/pxe.log 2>&1 & }; sleep 1;;
+        rc-service infra-pxe start 2>/dev/null || { cd "$PXE_DIR"; ./bin/infra-pxe serve --config conf/pxe.yaml >> logs/pxe.log 2>&1 & }; sleep 1;;
     *) D="${1:-$BACKUP_DIR}"; mkdir -p "$D"; [ ! -f "$DB" ] && { echo "ERROR: DB not found"; exit 1; }
         TS=$(date +%Y%m%d-%H%M%S); O="$D/pxe-${TS}.db"; sqlite3 "$DB" ".backup '$O'"
         sqlite3 "$O" "PRAGMA integrity_check;" | grep -q "ok" && echo "✓ $O ($(du -h "$O" | cut -f1))" || { echo "ERROR: integrity failed"; rm -f "$O"; exit 1; };;

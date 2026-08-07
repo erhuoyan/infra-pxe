@@ -19,18 +19,29 @@ echo " Building mkimage builder image"
 echo " Base: alpine:${ALPINE_VER}  Mirror: ${MIRROR}"
 echo "═══════════════════════════════════════════════"
 
-# Pre-clone aports on host
+# Pre-clone aports on host. Try mirror first, then GitHub; either can be flaky.
 APORTS_CACHE="$ROOT/release/iso/aports-cache"
 if [ ! -d "$APORTS_CACHE/.git" ]; then
     echo "── Cloning aports (one-time, ~100MB)..."
     rm -rf "$APORTS_CACHE"
-    git clone --depth=1 --single-branch \
-        https://ghproxy.net/https://github.com/alpinelinux/aports.git \
-        "$APORTS_CACHE" || {
-        echo "ERROR: cannot clone aports via ghproxy"
+    mkdir -p "$(dirname "$APORTS_CACHE")"
+    CLONE_OK=0
+    for repo in \
+        "https://ghproxy.net/https://github.com/alpinelinux/aports.git" \
+        "https://github.com/alpinelinux/aports.git"
+    do
+        echo "   → $repo"
+        if git clone --depth=1 --single-branch "$repo" "$APORTS_CACHE"; then
+            CLONE_OK=1
+            break
+        fi
+        rm -rf "$APORTS_CACHE"
+    done
+    if [ "$CLONE_OK" -ne 1 ]; then
+        echo "ERROR: cannot clone aports"
         echo "  Try: git clone --depth=1 https://github.com/alpinelinux/aports.git $APORTS_CACHE"
         exit 1
-    }
+    fi
     echo "   ✓ $(du -sh "$APORTS_CACHE" | cut -f1)"
 fi
 # Build context

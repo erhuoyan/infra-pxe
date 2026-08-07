@@ -195,7 +195,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=$INSTALL_DIR
-ExecStart=$INSTALL_DIR/bin/infra-pxe -config $INSTALL_DIR/conf/pxe.yaml
+ExecStart=$INSTALL_DIR/bin/infra-pxe serve --config $INSTALL_DIR/conf/pxe.yaml
 Restart=on-failure
 RestartSec=5
 LimitNOFILE=65535

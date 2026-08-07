@@ -74,7 +74,7 @@ data:
 
 ```bash
 # Start PXE engine
-./bin/infra-pxe --config conf/pxe.yaml
+./bin/infra-pxe serve --config conf/pxe.yaml
 
 # Configure DHCP (picks up interface and IP range)
 curl -X PUT http://localhost:9200/api/dhcp/config \

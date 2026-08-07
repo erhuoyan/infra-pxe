@@ -91,7 +91,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=/joyops/infra/pxe
-ExecStart=/joyops/infra/pxe/bin/infra-pxe --config conf/pxe.yaml
+ExecStart=/joyops/infra/pxe/bin/infra-pxe serve --config conf/pxe.yaml
 Restart=on-failure
 RestartSec=5
 LimitNOFILE=65536
