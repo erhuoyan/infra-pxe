@@ -129,7 +129,47 @@ infra-pxe/
 ├── conf/pxe.yaml.example     Configuration example
 ├── scripts/dhcp-event.sh      dnsmasq DHCP hook
 └── release/                   Build & deploy scripts
+## AI Agent Usage
+
+This repo includes a Claude Code skill for automating PXE operations via the `infra-pxe` MCP server.
+
+### Install
+
+Clone the repo, then symlink or copy the skill to your Claude Code skills directory:
+
+```bash
+# Symlink (recommended — auto-updates when you git pull)
+ln -s $(pwd)/skills/infra-pxe ~/.claude/skills/infra-pxe
+
+# Or copy
+cp -r skills/infra-pxe ~/.claude/skills/
 ```
+
+Then configure the MCP server in your `.claude/mcp.json` (or project `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "infra-pxe": {
+      "type": "http",
+      "url": "http://<your-worker-ip>:9200/mcp"
+    }
+  }
+}
+```
+
+### What it does
+
+The skill (`SKILL.md`) guides Claude through the full PXE lifecycle:
+
+- Deploy worker binary to target machine
+- Initialize seed data, DHCP config, ISO mounts
+- Create install tasks with network config
+- Validate templates before kicking off PXE boot
+- Manage DHCP static bindings for fixed IP allocation
+
+See `skills/infra-pxe/references/` for detailed tool reference docs.
+
 
 ## Requirements
 

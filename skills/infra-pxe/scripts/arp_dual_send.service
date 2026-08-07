@@ -1,0 +1,13 @@
+[Unit]
+Description=arp_dual_send
+After=network.target
+
+[Service]
+User=root
+Restart=always
+RestartSec=10
+WorkingDirectory=/usr/local/bin
+ExecStart=/usr/local/bin/arp_dual_send.sh
+
+[Install]
+WantedBy=multi-user.target
