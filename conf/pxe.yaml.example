@@ -1,0 +1,18 @@
+server:
+  listen: "0.0.0.0"
+  port: 9200
+  name: "pxe-1"
+
+dnsmasq:
+  binary: "dnsmasq"
+  conf_dir: "data/dnsmasq"
+  pid_file: "data/dnsmasq/dnsmasq.pid"
+  lease_time: "5m"
+
+data:
+  dir: "data"
+
+# Optional: forward install events to an external system (CMDB, controller, etc.)
+# webhook:
+#   url: "http://your-cmdb:8080/api/hook/pxe-event"
+#   token: "your-bearer-token"

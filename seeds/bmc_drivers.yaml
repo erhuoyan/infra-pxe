@@ -1,0 +1,45 @@
+# BMC 驱动种子数据
+# POST /api/seed/import 时自动加载，bid 已存在的不覆盖
+# 匹配优先级: model+firmware精确 → model兜底 → 厂商关键词 → generic_redfish
+
+- bid: "drv-huawei"
+  name: "华为 iBMC"
+  bmc_model: "iBMC3"
+  bmc_firmware: ""
+  driver_type: "huawei"
+  config: "{}"
+
+- bid: "drv-inspur"
+  name: "浪潮 InManage"
+  bmc_model: "SA5212M5"
+  bmc_firmware: ""
+  driver_type: "inspur"
+  config: "{}"
+
+- bid: "drv-dell"
+  name: "Dell iDRAC"
+  bmc_model: "iDRAC"
+  bmc_firmware: ""
+  driver_type: "dell"
+  config: "{}"
+
+- bid: "drv-zte"
+  name: "中兴 BMC"
+  bmc_model: "zte-generic"
+  bmc_firmware: ""
+  driver_type: "zte"
+  config: "{}"
+
+- bid: "drv-sushy"
+  name: "Sushy 模拟器"
+  bmc_model: "Sushy Emulator"
+  bmc_firmware: ""
+  driver_type: "sushy"
+  config: "{\"scheme\":\"http\"}"
+
+- bid: "drv-generic_redfish"
+  name: "通用 Redfish"
+  bmc_model: "generic"
+  bmc_firmware: ""
+  driver_type: "generic_redfish"
+  config: "{}"

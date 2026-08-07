@@ -1,0 +1,31 @@
+# 文件种子数据
+# POST /api/seed/import 时自动加载，bid 已存在的不覆盖
+# 文件实体需手动放到 data/files/{bid}/ 目录下
+
+- bid: fil-ofed58203-arm
+  name: "OFED 58203 openEuler ARM"
+  filename: "MLNX_OFED_LINUX-5.8-2.0.3.0-openeuler22.03-aarch64.tar"
+  category: "network"
+  dest_dir: "/tmp/drivers"
+  description: "Mellanox OFED 5.8-2.0.3.0 for openEuler 22.03 aarch64"
+
+- bid: fil-ofed58203-x64
+  name: "OFED 58203 openEuler X86"
+  filename: "MLNX_OFED_LINUX-5.8-2.0.3.0-openeuler22.03-x86_64.tar"
+  category: "network"
+  dest_dir: "/tmp/drivers"
+  description: "Mellanox OFED 5.8-2.0.3.0 for openEuler 22.03 x86_64"
+
+- bid: fil-ofs-arm
+  name: "OFS Wrapper ARM"
+  filename: "librdma-ofs-wrapper-58203.5.1.aarch64.rpm"
+  category: "network"
+  dest_dir: "/tmp/drivers"
+  description: "librdma-ofs-wrapper 5.1 for openEuler aarch64"
+
+- bid: fil-ofs-x64
+  name: "OFS Wrapper X86"
+  filename: "librdma-ofs-wrapper-58203.5.1.x86_64.rpm"
+  category: "network"
+  dest_dir: "/tmp/drivers"
+  description: "librdma-ofs-wrapper 5.1 for openEuler x86_64"

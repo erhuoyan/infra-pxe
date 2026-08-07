@@ -1,0 +1,82 @@
+text
+zerombr
+
+%include /tmp/partation.ks
+%include /tmp/network.ks
+%include /tmp/partition_layout.ks
+
+url --url=http://{{ pxe_server_ip }}:{{ pxe_server_port }}/{{ distro_path }}/repo
+
+keyboard --xlayouts='us'
+lang en_US.UTF-8
+timezone Asia/Shanghai --utc --nontp
+selinux --disabled
+firewall --disabled
+eula --agreed
+reboot
+%include /tmp/rootpw.ks
+firstboot --disable
+skipx
+services --disabled="chronyd"
+
+%packages
+@^minimal-environment
+NetworkManager
+wget
+curl
+%end
+
+{% if distro_family != "openeuler" %}
+%addon com_redhat_kdump --enable --reserve-mb='auto'
+%end
+
+%anaconda
+pwpolicy root --minlen=6 --minquality=1 --notstrict --nochanges --notempty
+pwpolicy user --minlen=6 --minquality=1 --notstrict --nochanges --emptyok
+pwpolicy luks --minlen=6 --minquality=1 --notstrict --nochanges --notempty
+%end
+{% endif %}
+
+%pre --interpreter=/bin/bash --log=/tmp/ks-pre.log
+export API_URL="http://{{ pxe_server_ip }}:{{ pxe_server_port }}"
+export LOG_FILE=/tmp/pxe-pre.log
+export DEFAULT_DISK_SIZE={{ disk_target_size }}
+
+# Download and execute %pre helper
+curl -sf --connect-timeout 10 --retry 3 \
+  "${API_URL}/api/pxe/scripts/pxe-pre.sh" -o /tmp/pxe-pre.sh
+if [ -f /tmp/pxe-pre.sh ]; then
+    bash /tmp/pxe-pre.sh
+else
+    echo "Failed to download pxe-pre.sh, falling back to inline" >> $LOG_FILE
+    # Minimal fallback: just set defaults so anaconda doesn't fail
+    echo "bootloader --location=mbr" > /tmp/partation.ks
+    echo "clearpart --all --initlabel" >> /tmp/partation.ks
+    echo "part /boot --fstype=xfs --size=1024" > /tmp/partition_layout.ks
+    echo "part /boot/efi --fstype=vfat --size=1024" >> /tmp/partition_layout.ks
+    echo "part / --fstype=xfs --grow" >> /tmp/partition_layout.ks
+    echo "network --device=link --bootproto=dhcp --onboot=yes --noipv6 --hostname=localhost" > /tmp/network.ks
+    echo "rootpw --plaintext 123456" > /tmp/rootpw.ks
+fi
+%end
+
+%post --nochroot --interpreter=/bin/bash
+cp /tmp/pxe-pre.log /mnt/sysimage/var/log/pxe-pre.log 2>/dev/null
+cp /tmp/ks-pre.log /mnt/sysimage/var/log/ks-pre.log 2>/dev/null
+cp /tmp/provision.json /mnt/sysimage/var/lib/pxe-provision.json 2>/dev/null
+%end
+
+%post
+export API_URL="http://{{ pxe_server_ip }}:{{ pxe_server_port }}"
+export PXE_REPO_URL="http://{{ pxe_server_ip }}:{{ pxe_server_port }}/{{ distro_path }}/repo"
+export LOG_FILE=/var/log/pxe-post.log
+
+# Download and execute %post helper
+curl -sf --connect-timeout 10 --retry 3 \
+  "${API_URL}/api/pxe/scripts/pxe-post.sh" -o /tmp/pxe-post.sh
+if [ -f /tmp/pxe-post.sh ]; then
+    bash /tmp/pxe-post.sh
+else
+    echo "[$(date +%Y-%m-%dT%H:%M:%S)] [ERROR] [post] failed to download pxe-post.sh" >> $LOG_FILE
+fi
+%end

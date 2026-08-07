@@ -1,0 +1,73 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  timezone: Asia/Shanghai
+
+  # === APT Source ===
+  # mirror_url: configured in template settings (empty = local ISO repo)
+  # Using 'primary' syntax for 22.04 compat; 'mirror-selection' is 23.04+ only
+  apt:
+    fallback: offline-install
+    primary:
+      - arches: [amd64, i386]
+        uri: {{ mirror_url }}
+      - arches: [arm64, armhf, ppc64el, s390x, riscv64]
+        uri: {{ mirror_url }}
+    preserve_sources_list: false
+
+  source:
+    id: ubuntu-server
+    search_drivers: false
+  kernel:
+    package: linux-generic
+
+  # === Identity ===
+  identity:
+    hostname: localhost
+    username: root
+    password: "$6$rounds=4096$salt$placeholder"
+
+  # === SSH ===
+  ssh:
+    install-server: true
+    allow-pw: true
+
+  # === Packages ===
+  # Keep empty — ISO offline may not have these packages.
+  # Additional packages installed in pxe-post-ubuntu.sh if network available.
+  packages: []
+
+  # === Default Storage (overridden by early-commands if provision.json exists) ===
+  storage:
+    layout:
+      name: lvm
+      sizing-policy: all
+      match:
+        size: largest
+
+  # === Default Network (overridden by early-commands if provision.json exists) ===
+  network:
+    version: 2
+    ethernets:
+      id0:
+        match:
+          name: "en*"
+        dhcp4: true
+
+  # === Early Commands ===
+  # Download and execute provision script (generates dynamic storage/network config)
+  # Subiquity re-reads /autoinstall.yaml AFTER early-commands complete
+  early-commands:
+    - curl -sf --connect-timeout 10 --retry 3 http://{{ pxe_server_ip }}:{{ pxe_server_port }}/api/pxe/scripts/pxe-pre-ubuntu.sh -o /tmp/pxe-pre-ubuntu.sh && bash /tmp/pxe-pre-ubuntu.sh "http://{{ pxe_server_ip }}:{{ pxe_server_port }}"
+
+  # === Late Commands ===
+  late-commands:
+    - cp /tmp/provision.json /target/var/lib/pxe-provision.json 2>/dev/null || true
+    - cp /tmp/pxe-early.log /target/var/log/pxe-early.log 2>/dev/null || true
+    - curtin in-target --target=/target -- bash -c 'export API_URL="http://{{ pxe_server_ip }}:{{ pxe_server_port }}"; export LOG_FILE=/var/log/pxe-post.log; curl -sf --connect-timeout 10 --retry 3 "${API_URL}/api/pxe/scripts/pxe-post-ubuntu.sh" -o /tmp/pxe-post-ubuntu.sh && bash /tmp/pxe-post-ubuntu.sh'
+
+  updates: security
+  shutdown: reboot

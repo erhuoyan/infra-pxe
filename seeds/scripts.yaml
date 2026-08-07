@@ -1,0 +1,186 @@
+# 脚本种子数据
+# POST /api/seed/import 时自动加载，bid 已存在的不覆盖
+
+- bid: scr-install-ofed
+  name: "install-ofed"
+  category: "driver"
+  script_type: "bash"
+  description: "安装 Mellanox OFED 驱动（自动检测网卡，无 mlx 则跳过）"
+  content: |
+    #!/bin/bash
+    # install-ofed.sh
+    set -e
+
+    # 检测是否有 Mellanox 网卡
+    if ! lspci | grep -qi "Mellanox"; then
+        echo "No Mellanox NIC detected, skipping OFED install"
+        exit 0
+    fi
+
+    # 安装基础工具和编译依赖（repo 已由 pxe-post 配置为 PXE 本地源）
+    if command -v dnf >/dev/null 2>&1; then
+        dnf install -y tar gzip bzip2 perl pciutils lsof which \
+            kernel-devel kernel-headers gcc gcc-c++ make python3 python3-devel \
+            elfutils-libelf-devel dkms ncurses-devel \
+            autoconf automake libtool patch rpm-build createrepo_c \
+            gdb-headless python3-unversioned-command \
+            gtk2 atk cairo tcl tk tcsh kmod \
+            pciutils-devel fuse-devel
+    elif command -v apt-get >/dev/null 2>&1; then
+        apt-get update
+        apt-get install -y tar gzip bzip2 perl pciutils lsof \
+            linux-headers-$(uname -r) gcc g++ make python3 python3-dev \
+            libelf-dev dkms libncurses-dev \
+            autoconf automake libtool patch rpm2cpio \
+            gdb tcl tk tcsh kmod \
+            libfuse-dev debhelper dpkg-dev
+    fi
+
+    cd /tmp/drivers
+
+    # 找到 OFED 包（支持 .tgz 和 .tar）
+    OFED_PKG=$(ls MLNX_OFED_*.tgz MLNX_OFED_*.tar 2>/dev/null | head -1)
+    if [ -z "$OFED_PKG" ]; then
+        echo "ERROR: MLNX_OFED package not found in /tmp/drivers/"
+        exit 1
+    fi
+
+    echo "Installing OFED from: $OFED_PKG"
+    tar xf "$OFED_PKG"
+
+    OFED_DIR=$(ls -d MLNX_OFED_*/ 2>/dev/null | head -1)
+    if [ -z "$OFED_DIR" ]; then
+        echo "ERROR: extracted OFED directory not found"
+        exit 1
+    fi
+    cd "$OFED_DIR"
+
+    # 安装 OFED（不更新固件，自动适配内核）
+    ./mlnxofedinstall --force --without-fw-update --add-kernel-support
+
+    # 重建 initramfs
+    if command -v dracut >/dev/null 2>&1; then
+        dracut -f 2>/dev/null || true
+    elif command -v update-initramfs >/dev/null 2>&1; then
+        update-initramfs -u 2>/dev/null || true
+    fi
+
+    echo "OFED installed successfully"
+
+- bid: scr-jdts-init
+  name: "jdts-init"
+  category: "init"
+  script_type: "bash"
+  description: "JDTS 存储节点初始化（安装基础包 + 擦除数据盘 + 关闭 HDD 写缓存 + 安装 OFS）"
+  content: |
+    #!/bin/bash
+    # jdts-init.sh — 存储节点初始化
+    # 1. 安装基础运维工具包
+    # 2. 擦除所有非系统盘分区
+    # 3. 关闭 HDD 写缓存（无 HDD 则跳过）
+    # 4. 安装 librdma-ofs-wrapper（RPM 不存在则跳过）
+    set -e
+
+    echo "=== [1/4] Install base packages ==="
+
+    if command -v dnf >/dev/null 2>&1; then
+        dnf install -y \
+            createrepo rsync wget curl lsof sysstat net-tools tar unzip \
+            dmidecode ipmitool vim telnet numactl nvme-cli smartmontools \
+            bash-completion chrony tmux quota ctdb libaio libaio-devel \
+            mariadb perl-interpreter audit hwloc-gui pcp-system-tools \
+            nmap-ncat mtr strace cmake gcc-gfortran tcl tk tuned tcsh \
+            php-cli pcre gssproxy userspace-rcu \
+            gdisk parted hdparm
+    elif command -v apt-get >/dev/null 2>&1; then
+        apt-get install -y \
+            rsync wget curl lsof sysstat net-tools tar unzip \
+            dmidecode ipmitool vim telnet numactl nvme-cli smartmontools \
+            bash-completion chrony tmux quota libaio-dev \
+            mariadb-client perl audit nmap ncat mtr strace cmake \
+            gfortran tcl tk tuned tcsh gdisk parted hdparm
+    fi
+
+    echo "Base packages installed"
+
+    echo ""
+    echo "=== [2/4] Wipe data disks (exclude system disk) ==="
+
+    SYS_DISK=$(lsblk -no PKNAME $(findmnt -n -o SOURCE /) 2>/dev/null | head -1)
+    if [ -z "$SYS_DISK" ]; then
+        SYS_DISK=$(lsblk -no PKNAME $(findmnt -n -o SOURCE /boot) 2>/dev/null | head -1)
+    fi
+    if [ -z "$SYS_DISK" ]; then
+        echo "ERROR: cannot detect system disk, skipping wipe for safety"
+    else
+        SYS_DISK=$(echo "$SYS_DISK" | sed 's/p[0-9]*$//' | sed 's/[0-9]*$//')
+        echo "System disk: /dev/$SYS_DISK (excluded)"
+
+        WIPED=0
+        for disk in $(lsblk -d -n -o NAME,TYPE | awk '$2 == "disk" {print $1}'); do
+            [ "$disk" = "$SYS_DISK" ] && continue
+            [ "$(cat /sys/block/$disk/removable 2>/dev/null)" = "1" ] && continue
+            SIZE=$(cat /sys/block/$disk/size 2>/dev/null)
+            [ -z "$SIZE" ] || [ "$SIZE" = "0" ] && continue
+
+            echo "WIPE: /dev/$disk"
+            -af /dev/$disk 2>/dev/null || true
+            gdisk -Z /dev/$disk 2>/dev/null || true
+            parted /dev/$disk --script mklabel gpt 2>/dev/null || true
+            WIPED=$((WIPED + 1))
+        done
+        echo "Wiped $WIPED data disk(s)"
+    fi
+
+    echo ""
+    echo "=== [3/4] Disable HDD write cache ==="
+
+    HDD_COUNT=0
+    for disk in $(lsblk -d -n -o NAME,TYPE | awk '$2 == "disk" {print $1}'); do
+        ROTATIONAL=$(cat /sys/block/$disk/queue/rotational 2>/dev/null)
+        [ "$ROTATIONAL" != "1" ] && continue
+
+        echo "HDD: /dev/$disk"
+        if smartctl -s wcache-sct,off,p /dev/$disk 2>/dev/null | grep -qi "success\|cache.*disabled"; then
+            echo "  -> write cache disabled (SCT permanent)"
+            HDD_COUNT=$((HDD_COUNT + 1))
+        elif command -v hdparm >/dev/null 2>&1; then
+            hdparm -W 0 /dev/$disk 2>/dev/null
+            echo "  -> write cache disabled (hdparm)"
+            HDD_COUNT=$((HDD_COUNT + 1))
+        else
+            echo "  -> WARN: cannot disable cache"
+        fi
+    done
+
+    if [ $HDD_COUNT -eq 0 ]; then
+        echo "No HDD found, skipping"
+    else
+        echo "Disabled write cache on $HDD_COUNT HDD(s)"
+    fi
+
+    echo ""
+    echo "=== [4/4] Install librdma-ofs-wrapper ==="
+
+    OFS_RPM=$(ls /tmp/drivers/librdma-ofs-wrapper-*.rpm 2>/dev/null | head -1)
+    if [ -z "$OFS_RPM" ]; then
+        echo "OFS RPM not found in /tmp/drivers/, skipping"
+    else
+        mkdir -pv /etc/ofs/
+        cat > /etc/ofs/netlib.conf << 'OFSEOF'
+    {
+    "check_rdma_version":false
+    }
+    OFSEOF
+        echo "Installing: $OFS_RPM"
+        rpm -ivh --force "$OFS_RPM"
+        if rpm -qa | grep -q rdma-ofs; then
+            echo "OFS installed: $(rpm -qa | grep rdma-ofs)"
+        else
+            echo "ERROR: OFS installation verification failed"
+            exit 1
+        fi
+    fi
+
+    echo ""
+    echo "=== jdts-init complete ==="

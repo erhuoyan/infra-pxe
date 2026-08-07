@@ -1,0 +1,72 @@
+# 装机模板种子数据
+# POST /api/seed/import 时自动加载，bid 已存在的不覆盖
+
+- bid: tpl-euler03x64-std
+  label: "openEuler 22.03 X86"
+  iso_bid: iso-euler03x64-std
+  boot_type: kickstart
+  template: "openeuler.ks.cfg.j2"
+  kernel_args: "net.ifnames=0 biosdevname=0 fpi_to_tail=off"
+  script_bids: ""
+  file_bids: ""
+  mirror_url: ""
+
+- bid: tpl-euler03a64-std
+  label: "openEuler 22.03 ARM"
+  iso_bid: iso-euler03a64-std
+  boot_type: kickstart
+  template: "openeuler.ks.cfg.j2"
+  kernel_args: "net.ifnames=0 biosdevname=0 inst.geoloc=0 console=tty0 smmu.bypassdev=0x1000:0x17 smmu.bypassdev=0x1000:0x15"
+  script_bids: ""
+  file_bids: ""
+  mirror_url: ""
+
+- bid: tpl-rocky98x64
+  label: "Rocky 9.8 X86"
+  iso_bid: iso-rocky98x64
+  boot_type: kickstart
+  template: "ks.cfg.j2"
+  kernel_args: "net.ifnames=0 biosdevname=0"
+  script_bids: ""
+  file_bids: ""
+  mirror_url: ""
+
+- bid: tpl-ubuntu2204-x64
+  label: "Ubuntu 22.04 X86"
+  iso_bid: iso-ubuntu2204-x64
+  boot_type: cloud-init
+  template: "user-data.j2"
+  kernel_args: ""
+  script_bids: ""
+  file_bids: ""
+  mirror_url: "https://mirrors.bfsu.edu.cn/ubuntu/"
+
+- bid: tpl-ubuntu2404-x64
+  label: "Ubuntu 24.04 X86"
+  iso_bid: iso-ubuntu2404-x64
+  boot_type: cloud-init
+  template: "user-data.j2"
+  kernel_args: ""
+  script_bids: ""
+  file_bids: ""
+  mirror_url: "https://mirrors.bfsu.edu.cn/ubuntu/"
+
+- bid: tpl-jdts-rdma-arm
+  label: "JDTS RDMA openEuler ARM"
+  iso_bid: iso-euler03a64-std
+  boot_type: kickstart
+  template: "openeuler.ks.cfg.j2"
+  kernel_args: "net.ifnames=0 biosdevname=0 inst.geoloc=0 console=tty0 smmu.bypassdev=0x1000:0x17 smmu.bypassdev=0x1000:0x15"
+  script_bids: "scr-install-ofed,scr-jdts-init"
+  file_bids: "fil-ofed58203-arm,fil-ofs-arm"
+  mirror_url: ""
+
+- bid: tpl-jdts-rdma-x64
+  label: "JDTS RDMA openEuler X86"
+  iso_bid: iso-euler03x64-std
+  boot_type: kickstart
+  template: "openeuler.ks.cfg.j2"
+  kernel_args: "net.ifnames=0 biosdevname=0 fpi_to_tail=off"
+  script_bids: "scr-install-ofed,scr-jdts-init"
+  file_bids: "fil-ofed58203-x64,fil-ofs-x64"
+  mirror_url: ""

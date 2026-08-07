@@ -1,0 +1,64 @@
+# ISO 源种子数据
+# POST /api/seed/import 时自动加载，bid 已存在的不覆盖
+#
+# distro_path 运行时自动拼接: {distro_family}/{version}/{variant}/{arch}
+
+# ── openEuler 22.03 LTS SP4 ──
+- bid: iso-euler03a64-std
+  label: "openEuler 22.03 ARM64"
+  distro_family: openeuler
+  version: "openEuler-22.03-LTS-SP4"
+  variant: standard
+  arch: arm64
+  iso_path: openEuler-22.03-LTS-SP4-aarch64-dvd.iso
+
+- bid: iso-euler03a64-everything
+  label: "openEuler 22.03 ARM64 (everything)"
+  distro_family: openeuler
+  version: "openEuler-22.03-LTS-SP4"
+  variant: everything
+  arch: arm64
+  iso_path: openEuler-22.03-LTS-SP4-everything-aarch64-dvd.iso
+
+- bid: iso-euler03x64-std
+  label: "openEuler 22.03 X86"
+  distro_family: openeuler
+  version: "openEuler-22.03-LTS-SP4"
+  variant: standard
+  arch: x86_64
+  iso_path: openEuler-22.03-LTS-SP4-x86_64-dvd.iso
+
+- bid: iso-euler03x64-everything
+  label: "openEuler 22.03 X86 (everything)"
+  distro_family: openeuler
+  version: "openEuler-22.03-LTS-SP4"
+  variant: everything
+  arch: x86_64
+  iso_path: openEuler-22.03-LTS-SP4-everything-x86_64-dvd.iso
+
+# ── Rocky Linux 9.8 ──
+- bid: iso-rocky98x64
+  label: "Rocky 9.8 X86"
+  distro_family: rocky
+  version: "9.8"
+  variant: dvd
+  arch: x86_64
+  iso_path: Rocky-9.8-x86_64-dvd.iso
+
+# ── Ubuntu 22.04 LTS ──
+- bid: iso-ubuntu2204-x64
+  label: "Ubuntu 22.04 AMD64"
+  distro_family: ubuntu
+  version: "22.04"
+  variant: live-server
+  arch: amd64
+  iso_path: ubuntu-22.04.5-live-server-amd64.iso
+
+# ── Ubuntu 24.04 LTS ──
+- bid: iso-ubuntu2404-x64
+  label: "Ubuntu 24.04 AMD64"
+  distro_family: ubuntu
+  version: "24.04"
+  variant: live-server
+  arch: amd64
+  iso_path: ubuntu-24.04.4-live-server-amd64.iso
