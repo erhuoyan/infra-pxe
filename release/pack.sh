@@ -22,7 +22,7 @@ DIST="$ROOT/release/dist"
 
 for PLATFORM in linux-amd64 linux-arm64; do
     echo "── Building PXE Engine ($PLATFORM)..."
-    (cd "$ROOT" && GOOS=linux GOARCH=${PLATFORM#linux-} go build -ldflags="-s -w" -o "$ROOT/release/bin/infra-pxe-$PLATFORM" .)
+    (cd "$ROOT" && CGO_ENABLED=0 GOOS=linux GOARCH=${PLATFORM#linux-} go build -ldflags="-s -w" -o "$ROOT/release/bin/infra-pxe-$PLATFORM" .)
 
     STAGE=$(mktemp -d)
     DEST="$STAGE/infra-pxe"

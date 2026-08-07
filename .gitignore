@@ -1,3 +1,5 @@
 .omp/
 release/bin/
 release/dist/
+release/iso/
+bin/
